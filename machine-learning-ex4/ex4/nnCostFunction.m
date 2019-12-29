@@ -62,22 +62,23 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+X = [ones(m,1) X];
+ymat = [1:1:num_labels]== y;
 
+% second rayer
+z2 = X*Theta1';
+a2 = [ones(m,1) sigmoid(z2)];
 
+% third = output rayer
+z3 = a2*Theta2';
+a3 = sigmoid(z3);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+for i = 1:m
+  for k= 1:num_labels
+  J  += -ymat(i,k)*log(a3(i,k)) -(1-ymat(i,k))*log(1-a3(i,k));
+  end
+end
+J = J/m;
 
 
 % -------------------------------------------------------------
