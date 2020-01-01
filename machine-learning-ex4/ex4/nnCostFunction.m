@@ -69,7 +69,6 @@ ymat = [1:1:num_labels]== y;
 z2 = X*Theta1';
 a2 = [ones(m,1) sigmoid(z2)];
 
-% third = output rayer
 z3 = a2*Theta2';
 a3 = sigmoid(z3);
 
@@ -80,8 +79,73 @@ for i = 1:m
 end
 J = J/m;
 
+for i = 1:size(Theta1)(1)
+    for j = 2:size(Theta1)(2)
+      J += lambda/2/m * Theta1(i,j)^2;
+    end
+end
 
+for i = 1:size(Theta2)(1)
+    for j = 2:size(Theta2)(2)
+      J += lambda/2/m * Theta2(i,j)^2;
+    end
+end
+
+% Do back propagation すべてのデータセットに対してbackpropagationを実施する
+% Theta_1 25*401 Theta_2 10*26
+
+y_new = zeros(num_labels, m); % 10*5000
+for i=1:m,
+  y_new(y(i),i)=1;
+end
+
+for k = 1:m
+%forward propagation
+  z_1 = X(k,:); %401 * 1 vector
+  z_1 = z_1'; # 1*401 vector
+  z_2 = Theta1*z_1; % 25*401 * 401*1 = 25*1 vector
+  a_2 = sigmoid(z_2); % 25*1 vector
+  
+  a_2 = [1 ; a_2]; % 26*1 vector.bias term added.
+  z_3 = Theta2*a_2; % 10*26* 26*1 = 10*1 vectorｃ
+  a_3 = sigmoid(z_3); % 10*1 vector
+
+%back propagation
+%  delta_3 = a_3 - ymat(k,:)'; % 10*1 vector
+  delta_3 = a_3 - y_new(:,k); % 10*1 vector
+  z_2 = [1; z_2]; % 26*1 vector.bias term added.
+  
+  delta_2 = (Theta2'*delta_3).*sigmoidGradient(z_2); % delta_2 calculated. 26*1 vector
+  
+  delta_2 = delta_2(2:end); % 25*1 vector. Cut off the bias term.
+
+%calculate Delta terms
+  Theta1_grad = Theta1_grad + delta_2*z_1';
+  Theta2_grad = Theta2_grad + delta_3*a_2';  
+end
+
+  Theta1_grad = (1/m)*Theta1_grad;
+  Theta2_grad = (1/m)*Theta2_grad;  
+  
+  %regularized back propagation
+#{
+for i = 1:size(Theta1)(1)
+    for j = 2:size(Theta1)(2)
+      Theta1_grad = Theta1_grad + lambda/m*Theta1(i,j);
+    end
+end
+
+for i = 1:size(Theta2)(1)
+    for j = 2:size(Theta2)(2)
+      Theta2_grad = Theta2_grad + lambda/m*Theta2(i,j);
+    end
+end
+#}
+
+Theta1_grad(:, 2:end) = Theta1_grad(:, 2:end) + ((lambda/m) * Theta1(:, 2:end)); % for j >= 1 
+Theta2_grad(:, 2:end) = Theta2_grad(:, 2:end) + ((lambda/m) * Theta2(:, 2:end)); % for j >= 1
 % -------------------------------------------------------------
+
 
 % =========================================================================
 
